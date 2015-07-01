@@ -52,7 +52,15 @@ server {
     allow 127.0.0.1;
     deny all;
   }
+  
+  location ~ ^/assets/ {
+    expires 1y;
+    add_header Cache-Control public;
 
+    add_header ETag "";
+    break;
+  }
+  
   error_page 500 502 503 504 /500.html;
   location = /500.html {
     root <%= @application[:absolute_document_root] %>;
@@ -103,6 +111,14 @@ server {
       proxy_pass http://unicorn_<%= @application[:domains].first %>;
       break;
     }
+  }
+  
+  location ~ ^/assets/ {
+    expires 1y;
+    add_header Cache-Control public;
+
+    add_header ETag "";
+    break;
   }
 
   error_page 500 502 503 504 /500.html;

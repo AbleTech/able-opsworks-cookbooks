@@ -14,17 +14,19 @@ module OpsWorks
           adapter = if bundle_list.include?('mysql2')
             Chef::Log.info("Looks like #{app_name} uses mysql2 in its Gemfile")
             'mysql2'
-          else
+          elsif bundle_list.include?('mysql')
             Chef::Log.info("Gem mysql2 not found in the Gemfile of #{app_name}, defaulting to mysql")
             'mysql'
+          else
+            'postgresql'
           end
         else # no Gemfile - guess adapter by Rails version
           adapter = if File.exists?("#{app_root_path}/config/application.rb")
-            Chef::Log.info("Looks like #{app_name} is a Rails 3 application, defaulting to mysql2")
-            'mysql2'
+            Chef::Log.info("Looks like #{app_name} is a Rails 3 application, defaulting to postgresql")
+            'postgresql'
           else
-            Chef::Log.info("No config/application.rb found, assuming #{app_name} is a Rails 2 application, defaulting to mysql")
-            'mysql'
+            Chef::Log.info("No config/application.rb found, assuming #{app_name} is a Rails 2 application, defaulting to postgresql")
+            'postgresql'
           end
         end
 
@@ -41,5 +43,14 @@ module OpsWorks
         Chef::Log.info(OpsWorks::ShellOut.shellout("sudo su - #{app_config[:user]} -c 'cd #{app_root_path} && /usr/local/bin/bundle install --path #{app_config[:home]}/.bundler/#{app_name} --without=#{app_config[:ignore_bundler_groups].join(' ')}' 2>&1"))
       end
     end
+    
+    def self.precompile_assets(app_root_path, rails_env)
+      if system("cd #{app_root_path} && /usr/local/bin/rake -T | grep assets:precompile 1>/dev/null")
+        Chef::Log.info("Assets detected. Running assets precompile.")
+        Chef::Log.info("sudo su deploy -c 'cd #{app_root_path} && RAILS_ENV=#{rails_env} /usr/local/bin/bundle exec rake assets:precompile'")
+        Chef::Log.info(`sudo su deploy -c 'cd #{app_root_path} && RAILS_ENV=#{rails_env} /usr/local/bin/bundle exec rake assets:precompile 2>&1'`)
+      end
+    end
+    
   end
 end

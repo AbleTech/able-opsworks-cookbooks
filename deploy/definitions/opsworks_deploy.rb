@@ -104,6 +104,10 @@ define :opsworks_deploy do
           if deploy[:auto_bundle_on_deploy]
             OpsWorks::RailsConfiguration.bundle(application, node[:deploy][application], release_path)
           end
+          
+          if deploy[:auto_precompile_assets_on_deploy]
+            OpsWorks::RailsConfiguration.precompile_assets(release_path, node[:deploy][application][:rails_env])
+          end
 
           node.default[:deploy][application][:database][:adapter] = OpsWorks::RailsConfiguration.determine_database_adapter(
             application,
