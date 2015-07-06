@@ -1,0 +1,17 @@
+name 'able-opsworks-cookbooks'
+maintainer 'Marcus Baguley'
+maintainer_email 'marcus@abletech.nz'
+license 'Apache 2.0'
+description 'Site cookbook for opsworks'
+long_description 'Application cookbook for installing and configuring Opsworks Rails apps, RabbitMQ and Vault.'
+version '0.1.0'
+
+supports 'ubuntu', '>= 12.04'
+
+suggests 'consul'
+depends 'chef-vault'
+depends 'golang'
+depends 'libartifact', '~> 1.2'
+depends 'poise', '~> 2.0'
+depends 'poise-service'
+depends 'selinux'
