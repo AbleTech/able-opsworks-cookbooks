@@ -1,4 +1,4 @@
-asource "https://supermarket.getchef.com"
+source "https://supermarket.getchef.com"
 
 metadata
 cookbook 'erlang', '>=0.9'
