@@ -26,7 +26,7 @@ node[:deploy].each do |application, deploy|
       layers = node[:opsworks][:layers]
       layers.each {|layer_short_name, layer|
         ips = layer['instances'].values.map {|instance| instance['private_ip']}.join(', ')
-        f.puts "#{layer_short_name}=#{ips}"
+        f.puts "SERVER_#{layer_short_name.gsub('-', '_').upcase}=#{ips}"
       }
     end
   end
