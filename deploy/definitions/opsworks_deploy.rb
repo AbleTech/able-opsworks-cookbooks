@@ -133,7 +133,7 @@ define :opsworks_deploy do
           Chef::Log.info("dotenv creation :)")
           open("#{deploy[:deploy_to]}/shared/config/.env", 'w') do |f|
             require 'yaml'
-            deploy[:environment_variables].to_h.each do |name, value|
+            node[:environment_variables].to_h.each do |name, value|
               f.puts "#{name}=#{value.to_s.shellescape}"
             end
             layers = node[:opsworks][:layers]
