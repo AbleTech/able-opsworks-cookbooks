@@ -17,18 +17,17 @@ node[:deploy].each do |application, deploy|
 
   Chef::Log.info("Generating dotenv for app: #{application} with env: #{rails_env}...")
 
-  directory "#{deploy[:deploy_to]}/shared/config" do
-    group deploy[:group]
-    owner deploy[:user]
-    mode "0775"
-    action :create
-    recursive true
-  end
-
-  open("#{deploy[:deploy_to]}/shared/config/.env", 'w') do |f|
-    require 'yaml'
-    deploy[:environment_variables].to_h.each do |name, value|
-      f.puts "#{name}=#{value.to_s.shellescape}"
+  if File.exists?("#{deploy[:deploy_to]}/shared/config")
+    open("#{deploy[:deploy_to]}/shared/config/.env", 'w') do |f|
+      require 'yaml'
+      deploy[:environment_variables].to_h.each do |name, value|
+        f.puts "#{name}=#{value.to_s.shellescape}"
+      end
+      layers = node[:opsworks][:layers]
+      layers.each {|layer_short_name, layer|
+        ips = layer['instances'].values.map {|instance| instance['private_ip']}.join(', ')
+        f.puts "#{layer_short_name}=#{ips}"
+      }
     end
   end
 end
