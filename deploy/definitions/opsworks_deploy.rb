@@ -131,6 +131,7 @@ define :opsworks_deploy do
           end.run_action(:create)
 
           Chef::Log.info("dotenv creation :)")
+          require 'shellwords'
           open("#{deploy[:deploy_to]}/shared/config/.env", 'w') do |f|
             require 'yaml'
             node[:deploy][application][:environment_variables].to_h.each do |name, value|
@@ -151,7 +152,6 @@ define :opsworks_deploy do
               to "#{node[:deploy][application][:deploy_to]}/shared/config/database.yml"
             end
 
-            #            OpsWorks::RailsConfiguration.precompile_assets(release_path, node[:deploy][application][:rails_env])
 
             shared_path = "#{node[:deploy][application][:deploy_to]}/shared"
             # create shared directory for assets, if it doesn't exist
@@ -171,12 +171,11 @@ define :opsworks_deploy do
             end
 
             # Compile the assets
+            #OpsWorks::RailsConfiguration.precompile_assets(release_path, node[:deploy][application][:rails_env])
             execute "rake assets:precompile" do
-              owner node[:deploy][application][:user]
-              group node[:deploy][application][:group]
               cwd release_path
-              command "bundle exec rake assets:precompile"
-              environment({'RAILS_ENV' => node[:deploy][application][:rails_env]})
+              command "sudo su deploy -c 'RAILS_ENV=#{node[:deploy][application][:rails_env]} /usr/local/bin/bundle exec rake assets:precompile 2>&1'"
+              #environment({'RAILS_ENV' => node[:deploy][application][:rails_env]})
             end
           end
 
