@@ -101,14 +101,11 @@ define :opsworks_deploy do
         link_tempfiles_to_current_release
 
         if deploy[:application_type] == 'rails'
+          Chef::Log.info("Rails app before migrate")
           if deploy[:auto_bundle_on_deploy]
             OpsWorks::RailsConfiguration.bundle(application, node[:deploy][application], release_path)
           end
           
-          if deploy[:auto_precompile_assets_on_deploy]
-            OpsWorks::RailsConfiguration.precompile_assets(release_path, node[:deploy][application][:rails_env])
-          end
-
           node.default[:deploy][application][:database][:adapter] = OpsWorks::RailsConfiguration.determine_database_adapter(
             application,
             node[:deploy][application],
@@ -116,6 +113,7 @@ define :opsworks_deploy do
             :force => node[:force_database_adapter_detection],
             :consult_gemfile => node[:deploy][application][:auto_bundle_on_deploy]
           )
+          Chef::Log.info("Generate database.yml")
           template "#{node[:deploy][application][:deploy_to]}/shared/config/database.yml" do
             cookbook "rails"
             source "database.yml.erb"
@@ -131,6 +129,57 @@ define :opsworks_deploy do
               deploy[:database][:host].present?
             end
           end.run_action(:create)
+
+          Chef::Log.info("dotenv creation :)")
+          open("#{deploy[:deploy_to]}/shared/config/.env", 'w') do |f|
+            require 'yaml'
+            deploy[:environment_variables].to_h.each do |name, value|
+              f.puts "#{name}=#{value.to_s.shellescape}"
+            end
+            layers = node[:opsworks][:layers]
+            layers.each {|layer_short_name, layer|
+              ips = layer['instances'].values.map {|instance| instance['private_ip']}.join(', ')
+              f.puts "SERVER_#{layer_short_name.gsub('-', '_').upcase}=#{ips}"
+            }
+          end
+
+          Chef::Log.info("asset compilation #{deploy[:auto_precompile_assets_on_deploy]}")
+          if deploy[:auto_precompile_assets_on_deploy]
+
+            # link thedatabase.yml file in or assets wont compile
+            link "#{release_path}/config/database.yml" do
+              to "#{node[:deploy][application][:deploy_to]}/shared/config/database.yml"
+            end
+
+            #            OpsWorks::RailsConfiguration.precompile_assets(release_path, node[:deploy][application][:rails_env])
+
+            shared_path = "#{node[:deploy][application][:deploy_to]}/shared"
+            # create shared directory for assets, if it doesn't exist
+            directory "#{shared_path}/assets" do
+              owner node[:deploy][application][:user]
+              group node[:deploy][application][:group]
+              mode 0770
+              action :create
+              recursive true
+            end
+
+            # symlink current deploy's asset folder to shared assets each deploy
+            link "#{release_path}/public/assets" do
+              owner node[:deploy][application][:user]
+              group node[:deploy][application][:group]
+              to "#{shared_path}/assets"
+            end
+
+            # Compile the assets
+            execute "rake assets:precompile" do
+              owner node[:deploy][application][:user]
+              group node[:deploy][application][:group]
+              cwd release_path
+              command "bundle exec rake assets:precompile"
+              environment({'RAILS_ENV' => node[:deploy][application][:rails_env]})
+            end
+          end
+
         elsif deploy[:application_type] == 'aws-flow-ruby'
           OpsWorks::RailsConfiguration.bundle(application, node[:deploy][application], release_path)
         elsif deploy[:application_type] == 'php'
