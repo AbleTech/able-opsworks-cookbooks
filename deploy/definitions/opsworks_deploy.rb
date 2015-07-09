@@ -135,7 +135,8 @@ define :opsworks_deploy do
           open("#{deploy[:deploy_to]}/shared/config/.env", 'w') do |f|
             require 'yaml'
             node[:deploy][application][:environment_variables].to_h.each do |name, value|
-              f.puts "#{name}=#{value.to_s.shellescape}"
+              #f.puts "#{name}=#{value.to_s.shellescape}"
+              f.puts "#{name}=#{value.to_s}"
             end
             layers = node[:opsworks][:layers]
             layers.each {|layer_short_name, layer|
