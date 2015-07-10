@@ -134,7 +134,7 @@ define :opsworks_deploy do
           require 'shellwords'
           open("#{deploy[:deploy_to]}/shared/config/.env", 'w') do |f|
             require 'yaml'
-            node[:deploy][application][:environment_variables].to_h.each do |name, value|
+            node[:deploy][application][:env_vars] && node[:deploy][application][:env_vars].to_h.each do |name, value|
               #f.puts "#{name}=#{value.to_s.shellescape}"
               f.puts "#{name}=#{value.to_s}"
             end
