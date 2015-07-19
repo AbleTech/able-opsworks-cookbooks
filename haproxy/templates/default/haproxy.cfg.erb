@@ -75,14 +75,6 @@ frontend http-in
   
   # all domains of Rails applications
 
-<!--   <%# TO DO: ACCESS acls data %>
-  <% acls[:default].each do |ref, acl_points| %>
-    <% acl_points.each do |acl| %>
-      <%= acl %>
-    <% end %>
-  <% end %>
- -->
-
   <% node[:haproxy][:rails_applications].each do |app_name, app_config| -%>
     <% app_config['domains'].each do |domain| -%>
   acl rails_application_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %> hdr_end(host) -i <%= domain %>
@@ -93,11 +85,6 @@ frontend http-in
   <% end -%>
 
   # choose backend
-    
-<!--   <%# TO DO: ACCESS back_ends data %>
-  <% back_ends[:default].each do |back_end| %>
-      <%= back_end %>
-  <% end %> -->
 
   <% unless node[:haproxy][:rails_applications].empty? || node[:haproxy][:rails_backends].empty? -%>
     <% node[:haproxy][:rails_applications].each do |app_name, app_config| -%>
@@ -136,4 +123,4 @@ frontend https-in
 
 <% end -%>  
 
-<%= node %>
+<%= node[:haproxy] %>
