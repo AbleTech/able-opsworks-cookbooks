@@ -158,9 +158,44 @@ backend java_servers_ssl
   <% end -%>
 <% end -%>
 
+# BACKENDS for each api app
+<% node[:haproxy_extn] && !node[:haproxy_extn].empty? && node[:haproxy_extn][:rails_applications].each do |app_name, app_config| %>
+  <%
+    haproxy_rails_app = node[:haproxy][:rails_applications][app_name]
+    next if haproxy_rails_app.nil?
+    domains = haproxy_rails_app['domains']
+    app_config[:endpoints] && app_config[:endpoints].any? && domains.each do |domain|
+  %>
+  backend api_backend_<%= app_name %>
+    balance <%= node[:haproxy][:balance] %>
+    option redispatch
+    option forwardfor
+    option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
+    reqirep ^Host:\ <%= node[:haproxy_extn][:domain] %>    Host:\ <%= domain.gsub(/[^\w.:-]/, '_') %>
+    <% node[:haproxy][:rails_backends].each do |backend| -%>
+    server <%= backend['name'] %> <%= backend['ip'] %>:80 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_rails_app] %> check inter <%= node[:haproxy][:check_interval] %>
+    <% end %>
+  <% end -%>
+<% end %>
+
 frontend http-in
   bind :80
-  
+
+  # PATHBEG to choose a backend
+  <% node[:haproxy_extn] && !node[:haproxy_extn].empty? && node[:haproxy_extn][:rails_applications].each do |app_name, app_config| %>
+    #<%= app_name %>
+    #<%= app_config %>
+    <%
+      haproxy_rails_app = node[:haproxy][:rails_applications][app_name]
+      next if haproxy_rails_app.nil?
+      domains = haproxy_rails_app['domains']
+      app_config[:endpoints] && app_config[:endpoints].any? && domains.each do |domain|
+    %>
+    acl api_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %> hdr_end(host) -i <%= node[:haproxy_extn][:domain] %> path_beg <%= app_config[:endpoints].join(' ') %>
+    use_backend api_backend_<%= app_name %> if api_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %>
+    <% end %>
+  <% end %>
+
   # all domains of Rails applications
   <% node[:haproxy][:rails_applications].each do |app_name, app_config| -%>
     <% app_config['domains'].each do |domain| -%>
