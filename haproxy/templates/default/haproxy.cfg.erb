@@ -116,7 +116,7 @@ backend api_backend_<%= app_name %>
   balance <%= node[:haproxy][:balance] %>
   option redispatch
   option forwardfor
-  http-request set-header X-Api-Flag 'api-call'
+  reqadd X-No-Ssl-Redirect:true
   option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
   reqirep ^Host:\ <%= node[:haproxy_extn][:domain] %>    Host:\ <%= domain.gsub(/[^\w.:-]/, '_') %>
     <% node[:haproxy][:rails_backends].each do |backend| -%>
