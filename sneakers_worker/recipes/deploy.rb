@@ -4,9 +4,9 @@ node[:deploy].each do |application, deploy|
 
   # This stops all delayed jobs which have a pid file
   bash "sneakers_worker-#{application}-stop" do
-    cwd "#{deploy[:deploy_to]}/current"
+    cwd "#{deploy[:deploy_to]}"
     user 'deploy'
-    code "RAILS_ENV=#{deploy[:rails_env]} bin/sneakers_worker stop"
+    code "kill -SIGTERM `cat shared/pids/sneakers.pid`"
 
     action :nothing
   end
