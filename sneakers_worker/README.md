@@ -48,7 +48,7 @@ Two processes running all queues.
   "deploy": {
     "myapp": {
       "sneakers_worker": [{
-        "options": "-n 2"
+        "options": ""
       }],
 ```
 

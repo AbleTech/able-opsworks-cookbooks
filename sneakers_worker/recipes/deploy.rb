@@ -1,6 +1,25 @@
 include_recipe 'sneakers_worker::template'
+# Adapted from deploy::rails: https://github.com/aws/opsworks-cookbooks/blob/master/deploy/recipes/rails.rb
+include_recipe 'deploy'
 
 node[:deploy].each do |application, deploy|
+
+  if deploy[:application_type] != 'worker'
+    Chef::Log.debug("Skipping sneakers_worker::deploy application #{application} as it is not a worker app")
+    next
+  end
+  Chef::Log.debug("sneakers_worker::deploy application #{application} as it is a  worker app")
+
+  opsworks_deploy_dir do
+    user deploy[:user]
+    group deploy[:group]
+    path deploy[:deploy_to]
+  end
+
+  opsworks_deploy do
+    deploy_data deploy
+    app application
+  end
 
   # This stops all delayed jobs which have a pid file
   bash "sneakers_worker-#{application}-stop" do
@@ -30,4 +49,4 @@ CODE
   end
 end
 
-#include_recipe 'sneakers_worker::restart'
+include_recipe 'sneakers_worker::restart'
