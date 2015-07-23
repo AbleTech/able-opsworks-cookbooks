@@ -11,6 +11,7 @@ bash "restart-all-sneakers_worker" do
   user 'root'
   code <<CODE
 monit reload
+sleep 1
 monit -g sneakers_worker restart
 CODE
 end
