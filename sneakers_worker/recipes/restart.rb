@@ -10,6 +10,7 @@
 bash "restart-all-sneakers_worker" do
   user 'root'
   code <<CODE
+monit reload
 monit -g sneakers_worker restart
 CODE
 end
