@@ -17,8 +17,8 @@ node[:deploy].each do |application, deploy|
       :dir => deploy[:deploy_to],
       :user => deploy[:user],
       :group => deploy[:group],
-      :start_command => deploy[:bin],
-      :sneakers_options => global[:options]
+      :start_command => global[:bin],
+      :sneakers_options => deploy[:sneakers_worker] && deploy[:sneakers_worker][:options]
     )
     only_if { deploy[:sneakers_worker] }
   end
