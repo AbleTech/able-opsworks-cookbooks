@@ -10,6 +10,7 @@
 bash "restart-all-delayed_job" do
   user 'root'
   code <<CODE
+monit reload
 monit -g delayed_job restart
 CODE
 end
