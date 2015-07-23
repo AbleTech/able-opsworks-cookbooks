@@ -1,4 +1,4 @@
-check process <%= @app %>_sneakers_worker %> with pidfile <%= @dir %>/shared/pids/sneakers_worker.pid
+check process <%= @app %>_sneakers_worker with pidfile <%= @dir %>/shared/pids/sneakers_worker.pid
 start program = "/bin/su -c 'cd <%= @dir %>/current; /usr/bin/env RAILS_ENV=<%= @env %> <%= @dir %>/current/<%= @start_command %> <%= @sneakers_options %>' - <%= @user %>"
     with timeout 30 seconds
     stop program = "/bin/su -c '/usr/bin/env kill -SIGTERM `cat <%= @dir %>/shared/pids/sneakers.pid`' - <%= @user %>"
