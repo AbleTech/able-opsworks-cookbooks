@@ -9,6 +9,8 @@
 
 bash "restart-all-sneakers_worker" do
   user 'root'
+  retries 10
+  retry_delay 6
   code <<CODE
 monit reload
 sleep 1

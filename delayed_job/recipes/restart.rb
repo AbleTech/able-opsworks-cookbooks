@@ -9,6 +9,8 @@
 
 bash "restart-all-delayed_job" do
   user 'root'
+  retries 10
+  retry_delay 6
   code <<CODE
 monit reload
 sleep 1
