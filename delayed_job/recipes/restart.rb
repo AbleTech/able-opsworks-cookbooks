@@ -14,8 +14,6 @@ bash "restart-all-delayed_job" do
   code <<CODE
 monit reload
 sleep 1
-monit status
-sleep 10
 monit -g delayed_job restart
 CODE
 end
