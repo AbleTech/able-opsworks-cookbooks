@@ -38,12 +38,14 @@ module OpsWorks
 
     def self.bundle(app_name, app_config, app_root_path)
       if File.exists?("#{app_root_path}/Gemfile")
+        # Original install_path = "#{app_config[:home]}/.bundler/#{app_name}"
+        install_path = "#{app_config[:home]}/.bundler" # Be brave, save the internet - use a shared gem folder
         Chef::Log.info("Gemfile detected. Running bundle install.")
-        Chef::Log.info("sudo su - #{app_config[:user]} -c 'cd #{app_root_path} && /usr/local/bin/bundle install --path #{app_config[:home]}/.bundler/#{app_name} --without=#{app_config[:ignore_bundler_groups].join(' ')}'")
-        Chef::Log.info(OpsWorks::ShellOut.shellout("sudo su - #{app_config[:user]} -c 'cd #{app_root_path} && /usr/local/bin/bundle install --path #{app_config[:home]}/.bundler/#{app_name} --without=#{app_config[:ignore_bundler_groups].join(' ')}' 2>&1"))
+        Chef::Log.info("sudo su - #{app_config[:user]} -c 'cd #{app_root_path} && /usr/local/bin/bundle install --path #{install_path} --without=#{app_config[:ignore_bundler_groups].join(' ')}'")
+        Chef::Log.info(OpsWorks::ShellOut.shellout("sudo su - #{app_config[:user]} -c 'cd #{app_root_path} && /usr/local/bin/bundle install --path #{install_path} --without=#{app_config[:ignore_bundler_groups].join(' ')}' 2>&1"))
       end
     end
-    
+
     def self.precompile_assets(app_root_path, rails_env)
       if system("cd #{app_root_path} && /usr/local/bin/rake -T | grep assets:precompile 1>/dev/null")
         Chef::Log.info("Assets detected. Running assets precompile.")
@@ -51,6 +53,6 @@ module OpsWorks
         Chef::Log.info(`sudo su deploy -c 'cd #{app_root_path} && RAILS_ENV=#{rails_env} /usr/local/bin/bundle exec rake assets:precompile 2>&1'`)
       end
     end
-    
+
   end
 end
