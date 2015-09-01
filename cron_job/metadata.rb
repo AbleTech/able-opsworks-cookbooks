@@ -1,0 +1,6 @@
+name             'cron_job'
+maintainer       'AbleTech'
+maintainer_email 'info@abletech.nz'
+license          'All rights reserved'
+description      'Configures arbitrary cron jobs'
+version          '0.1.0'
