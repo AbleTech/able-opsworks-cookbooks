@@ -3,4 +3,5 @@ source "https://api.berkshelf.com"
 
 cookbook "newrelic"
 cookbook 'opsworks_rabbitmq', git: 'git://github.com/verdigris-cookbooks/opsworks-rabbitmq.git'
+cookbook 'opsworks-passenger', git: 'git://github.com/sportngin-cookbooks/opsworks-passenger.git'
 
