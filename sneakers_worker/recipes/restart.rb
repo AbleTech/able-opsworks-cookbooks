@@ -9,11 +9,9 @@
 
 bash "restart-all-sneakers_worker" do
   user 'root'
-  retries 10
-  retry_delay 6
+  retries 20
+  retry_delay 20
   code <<CODE
-monit reload
-sleep 1
 monit -g sneakers_worker restart
 CODE
 end
