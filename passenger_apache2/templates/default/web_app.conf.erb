@@ -57,8 +57,9 @@
     <% end -%>
   <% end -%>
 
-  # Redirect to HTTPS
+  # Redirect to HTTPS if not on https AND not on a health check
   RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteCond %{REQUEST_URI} !^/health
   RewriteRule ^.*$ https://%{SERVER_NAME}%{REQUEST_URI}
 
   RewriteCond %{REQUEST_URI} !\.(css|gif|jpg|jpeg|png)$
