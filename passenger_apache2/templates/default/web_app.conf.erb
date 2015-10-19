@@ -57,10 +57,9 @@
     <% end -%>
   <% end -%>
 
-  # Canonical host
-  #RewriteCond %{HTTP_HOST}   !^<%= @params[:server_name] %> [NC]
-  #RewriteCond %{HTTP_HOST}   !^$
-  #RewriteRule ^/(.*)$        http://<%= @params[:server_name] %>/$1 [L,R=301]
+  # Redirect to HTTPS
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^.*$ https://%{SERVER_NAME}%{REQUEST_URI}
 
   RewriteCond %{REQUEST_URI} !\.(css|gif|jpg|jpeg|png)$
   RewriteCond %{DOCUMENT_ROOT}/system/maintenance.html -f
