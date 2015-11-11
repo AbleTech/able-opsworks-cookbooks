@@ -147,10 +147,6 @@
   #RewriteCond %{HTTP_HOST}   !^$
   #RewriteRule ^/(.*)$        http://<%= @params[:server_name] %>/$1 [L,R=301]
 
-  # if using Amazon ELB with SSL Termination
-  RewriteCond %{HTTP:X-Forwarded-Proto} !https
-  RewriteRule !(/health|/v1|/intra) https://%{SERVER_NAME}%{REQUEST_URI} [L,R]
-
   RewriteCond %{REQUEST_URI} !\.(css|gif|jpg|jpeg|png)$
   RewriteCond %{DOCUMENT_ROOT}/system/maintenance.html -f
   RewriteCond %{SCRIPT_FILENAME} !maintenance.html
