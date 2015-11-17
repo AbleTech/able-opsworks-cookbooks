@@ -134,7 +134,7 @@ frontend http-in
       next if haproxy_rails_app.nil?
       domains = haproxy_rails_app['domains']
       app_config[:endpoints] && app_config[:endpoints].any? && domains.select {|d| d.match(/\./)}.each do |domain| -%>
-  acl api_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %>_header hdr_end(host) -i <%= node[:haproxy_extn][:domain] %>
+  acl api_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %>_header hdr_end(host) -i api.<%= node[:haproxy_extn][:domain] %>
   acl api_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %>_path path_beg <%= app_config[:endpoints].join(' ') %>
   use_backend api_backend_<%= app_name %> if api_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %>_header api_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %>_path
     <% end %> # each domain
