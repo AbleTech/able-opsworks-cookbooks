@@ -117,7 +117,7 @@ backend api_backend_<%= app_name %>
   option redispatch
   option forwardfor
   option httpchk GET /health HTTP/1.1\r\nHost:\ <%= domain.gsub(/[^\w.:-]/, '_') %>
-  reqirep ^Host:\ <%= node[:haproxy_extn][:domain] %>    Host:\ <%= domain.gsub(/[^\w.:-]/, '_') %>
+  reqirep ^Host:\ api.<%= node[:haproxy_extn][:domain] %>    Host:\ <%= domain.gsub(/[^\w.:-]/, '_') %>
   reqadd X-No-Ssl-Redirect:true
     <% node[:haproxy][:rails_backends].each do |backend| -%>
   server <%= backend['name'] %> <%= backend['ip'] %>:80 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_rails_app] %> check inter <%= node[:haproxy][:check_interval] %>
