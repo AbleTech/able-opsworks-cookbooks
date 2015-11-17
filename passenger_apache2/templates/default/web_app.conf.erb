@@ -76,7 +76,7 @@
   <% end -%>
 </VirtualHost>
 
-<% if node[:deploy][@application_name][:ssl_support] -%>
+<% if false && node[:deploy][@application_name][:ssl_support] -%>
 <VirtualHost *:443>
   ServerName <%= @params[:server_name] %>
   <% if @params[:server_aliases] && !@params[:server_aliases].empty? -%>
